@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="snes_automatizer.RadioButtonEnumControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ItemsControl x:Name="EnumList">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <RadioButton Margin="5" GroupName="{Binding EnumGroupName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                             Content="{Binding DisplayName}" 
+                             ToolTip="{Binding Description}"
+                             Tag="{Binding EnumName}"
+                             IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                             Checked="RadioButton_Checked">
+                </RadioButton>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

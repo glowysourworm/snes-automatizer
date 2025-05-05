@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "snes-automatizer": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Backup\\_Source\\Git\\snes-automatizer\\example.json"
+    }
+  }
+}
