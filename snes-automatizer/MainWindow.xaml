@@ -115,6 +115,19 @@
         <TextBlock Text="Output" FontSize="16" Margin="10 10 10 0" Grid.Row="3" />
 
         <!-- Output Log -->
-        <ListView x:Name="OutputLB" ItemsSource="{Binding OutputMessages}" Foreground="Black" Grid.Row="4" Margin="10" />
+        <ListView x:Name="OutputLB" ItemsSource="{Binding OutputMessages}" Foreground="Black" Grid.Row="4" Margin="10">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="_Copy" Click="OutputMessage_Click" Tag="{Binding}" />
+                            </ContextMenu>
+                        </Grid.ContextMenu>
+                        <TextBlock Text="{Binding}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Window>

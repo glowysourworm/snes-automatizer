@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 using Microsoft.Win32;
 
@@ -266,7 +268,7 @@ namespace snes_automatizer
                 if (MessageBox.Show("Execute Compilation?", "SNES Compiler", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
                 {
                     Log("Running Compiler...");
-                    if (_compiler.ExecuteRun(_compilation))
+                    if (_compiler.ExecuteRun(_compilation, _validatedSettings.Settings.ProjectFolder))
                     {
                         Log("Compilation Succeeded!");
                     }
@@ -306,6 +308,19 @@ namespace snes_automatizer
                 this.ProjectFilesLB.Items.Insert(index - 1, swap);
 
                 this.ProjectFilesLB.SelectedIndex = index - 1;
+            }
+        }
+
+        private void OutputMessage_Click(object sender, RoutedEventArgs e)
+        {
+            var item = sender as MenuItem;
+
+            if (item != null)
+            {
+                var message = item.Tag as string;
+
+                // Set Clipboard
+                Clipboard.SetText(message);
             }
         }
     }

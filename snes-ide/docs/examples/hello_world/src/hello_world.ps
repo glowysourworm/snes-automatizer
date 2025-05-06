@@ -1,0 +1,222 @@
+.include "hdr.asm"
+.accu 16
+.index 16
+.16bit
+.BASE $80
+.define __main_locals 0
+
+.SECTION ".maintext_0x0" SUPERFREE
+
+main:
+; sub sp,#__main_locals
+.ifgr __main_locals 0
+tsa
+sec
+sbc #__main_locals
+tas
+.endif
+; push2 imm r 0xf0
+pea.w 26624
+; call r 0x2f0
+jsr.l consoleSetTextVramBGAdr
+; add sp, #2
+pla
+; push2 imm r 0xf0
+pea.w 12288
+; call r 0x2f0
+jsr.l consoleSetTextVramAdr
+; add sp, #2
+pla
+; push2 imm r 0xf0
+pea.w 256
+; call r 0x2f0
+jsr.l consoleSetTextOffset
+; add sp, #2
+pla
+; push4 imm r 0x52f0
+pea.w :palfont
+pea.w palfont + 0
+; push4 imm r 0x52f0
+pea.w :tilfont
+pea.w tilfont + 0
+; push1 imm r 0xf0
+sep #$20
+lda #32
+pha
+rep #$20
+; push1 imm r 0xf0
+sep #$20
+lda #0
+pha
+rep #$20
+; call r 0x2f0
+jsr.l consoleInitText
+; add sp, #10
+tsa
+clc
+adc #10
+tas
+; push2 imm r 0xf0
+pea.w 8192
+; push1 imm r 0xf0
+sep #$20
+lda #0
+pha
+rep #$20
+; call r 0x2f0
+jsr.l bgSetGfxPtr
+; add sp, #3
+tsa
+clc
+adc #3
+tas
+; push1 imm r 0xf0
+sep #$20
+lda #0
+pha
+rep #$20
+; push2 imm r 0xf0
+pea.w 26624
+; push1 imm r 0xf0
+sep #$20
+lda #0
+pha
+rep #$20
+; call r 0x2f0
+jsr.l bgSetMapPtr
+; add sp, #4
+tsa
+clc
+adc #4
+tas
+; push1 imm r 0xf0
+sep #$20
+lda #0
+pha
+rep #$20
+; push1 imm r 0xf0
+sep #$20
+lda #1
+pha
+rep #$20
+; call r 0x2f0
+jsr.l setMode
+; add sp, #2
+pla
+; push1 imm r 0xf0
+sep #$20
+lda #1
+pha
+rep #$20
+; call r 0x2f0
+jsr.l bgSetDisable
+; add sp, #1
+tsa
+clc
+adc #1
+tas
+; push1 imm r 0xf0
+sep #$20
+lda #2
+pha
+rep #$20
+; call r 0x2f0
+jsr.l bgSetDisable
+; add sp, #1
+tsa
+clc
+adc #1
+tas
+; push4 imm r 0x12f0
+pea.w :tccs_{WLA_FILENAME}_L.{WLA_FILENAME}8
+pea.w tccs_{WLA_FILENAME}_L.{WLA_FILENAME}8 + 0
+; push2 imm r 0xf0
+pea.w 10
+; push2 imm r 0xf0
+pea.w 10
+; call r 0x2f0
+jsr.l consoleDrawText
+; add sp, #8
+tsa
+clc
+adc #8
+tas
+; push4 imm r 0x12f0
+pea.w :tccs_{WLA_FILENAME}_L.{WLA_FILENAME}9
+pea.w tccs_{WLA_FILENAME}_L.{WLA_FILENAME}9 + 0
+; push2 imm r 0xf0
+pea.w 14
+; push2 imm r 0xf0
+pea.w 6
+; call r 0x2f0
+jsr.l consoleDrawText
+; add sp, #8
+tsa
+clc
+adc #8
+tas
+; push4 imm r 0x12f0
+pea.w :tccs_{WLA_FILENAME}_L.{WLA_FILENAME}10
+pea.w tccs_{WLA_FILENAME}_L.{WLA_FILENAME}10 + 0
+; push2 imm r 0xf0
+pea.w 18
+; push2 imm r 0xf0
+pea.w 3
+; call r 0x2f0
+jsr.l consoleDrawText
+; add sp, #8
+tsa
+clc
+adc #8
+tas
+; call r 0x2f0
+jsr.l setScreenOn
+__local_0:
+; gtst inv 1 t 0 v 240 r 2130 ind 2130
+; uncond jump: nop
+; gtst finished; t 0
+; call r 0x2f0
+jsr.l WaitForVBlank
+; gjmp_addr 2130 at 2244
+jmp.w __local_0
+; gsym_addr t 2244 a 2130 ind 2285
+; gsym_addr t 0 a 2320 ind 2320
+; gsym_addr t 0 a 2130 ind 2352
+; load 0
+; type 0 reg 0xf0 extra 0x0
+; ld2 #0,tcc__r0
+lda.w #0
+sta.b tcc__r0
+; gjmp_addr 0 at 2461
+jmp.w __local_1
+; gsym_addr t 2461 a 0 ind 2499
+__local_1:
+; gsym_addr t 2461 a 2531 ind 2531
+; add sp, #__main_locals
+.ifgr __main_locals 0
+tsa
+clc
+adc #__main_locals
+tas
+.endif
+rtl
+.ENDS
+.BASE $00
+.RAMSECTION "ram{WLA_FILENAME}.data" APPENDTO "globram.data"
+
+.ENDS
+
+.SECTION "{WLA_FILENAME}.data" APPENDTO "glob.data"
+
+.ENDS
+
+.SECTION ".rodata" SUPERFREE
+
+tccs_{WLA_FILENAME}_L.{WLA_FILENAME}8: .db $48,$65,$6c,$6c,$6f,$20,$57,$6f,$72,$6c,$64,$20,$21,$0
+tccs_{WLA_FILENAME}_L.{WLA_FILENAME}9: .db $57,$45,$4c,$43,$4f,$4d,$45,$20,$54,$4f,$20,$50,$56,$53,$4e,$45,$53,$4c,$49,$42,$0
+tccs_{WLA_FILENAME}_L.{WLA_FILENAME}10: .db $48,$54,$54,$50,$53,$3a,$2f,$2f,$57,$57,$57,$2e,$50,$4f,$52,$54,$41,$42,$4c,$45,$44,$45,$56,$2e,$43,$4f,$4d,$0
+.ENDS
+
+.BASE $00
+.RAMSECTION ".bss" BANK $7e SLOT 2
+.ENDS

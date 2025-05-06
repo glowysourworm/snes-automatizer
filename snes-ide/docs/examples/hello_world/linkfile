@@ -1,0 +1,9 @@
+[objects]
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\hello_world\data.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\hello_world\hdr.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\hello_world\src\hello_world.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\hello_world\src\hello_world.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_FastROM\crt0_snes.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_FastROM\libc.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_FastROM\libm.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_FastROM\libtcc.obj

@@ -20,9 +20,19 @@ namespace snes_automatizer.Command
                 process.StartInfo.FileName = _command.ExeFilePath;
                 process.StartInfo.RedirectStandardInput = true;
                 process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.Arguments = string.Join(' ', _command.Arguments);
+                process.ErrorDataReceived += (sender, args) =>
+                {
+                    // Must pass this to the dispacther
+                    Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, () =>
+                    {
+                        messageCallback(args.Data ?? "");
+                    });
+                };
+                /*
                 process.OutputDataReceived += (sender, args) =>
                 {
                     // Must pass this to the dispacther
@@ -31,8 +41,10 @@ namespace snes_automatizer.Command
                         messageCallback(args.Data ?? "");
                     });
                 };
+                */
                 process.Start();
                 process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
                 process.StandardInput.WriteLine("Process Started:  " + _command.ExeFilePath);
                 process.StandardInput.Flush();
                 process.StandardInput.Close();

@@ -289,8 +289,13 @@ namespace snes_automatizer
 
             return new Compilation(new CompilationCommandSet(ccommands, asmCommands, linkCommand));
         }
-        public bool ExecuteRun(Compilation compilation)
+        public bool ExecuteRun(Compilation compilation, string workingDir)
         {
+            // PROBLEM WITH WORKING DIRECTORY:  The compilers are creating .asm files that reference base directory
+            //                                  files. (look for assembler compiler errors)
+            //
+            Directory.SetCurrentDirectory(workingDir);
+
             // Procedure:  See automatizer.py: https://github.com/BrunoRNS/SNES-IDE/blob/main/libs/pvsneslib/devkitsnes/automatizer.py
             //
             // 1) Run C-File Commands:   Compile -> Optimize -> Constify -> Assemble
