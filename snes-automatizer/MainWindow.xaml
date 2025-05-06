@@ -32,9 +32,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="200" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
         <!-- File Menu -->
@@ -83,20 +83,34 @@
 
 
         <!-- Project Files (C / ASM) -->
-        <ListBox x:Name="ProjectFilesLB" Grid.Column="1" Grid.RowSpan="3" Grid.Row="2" Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <CheckBox IsChecked="{Binding Included}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Path}" Margin="7 1 1 1" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" TextTrimming="CharacterEllipsis" />
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Grid Grid.Column="1" Grid.RowSpan="3" Grid.Row="2" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ListBox x:Name="ProjectFilesLB">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox IsChecked="{Binding Included}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Path}" Margin="7 1 1 1" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" TextTrimming="CharacterEllipsis" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Grid.Column="1">
+                <Button x:Name="OrderUpButton" Height="24" Width="24" Content="V" Click="OrderUpButton_Click">
+                    <Button.RenderTransform>
+                        <RotateTransform Angle="180" CenterX="12" CenterY="12" />
+                    </Button.RenderTransform>
+                </Button>
+                <Button x:Name="OrderDownButton" Height="24" Width="24" Content="V" Click="OrderDownButton_Click" />
+            </StackPanel>
+        </Grid>
 
         <TextBlock Text="Output" FontSize="16" Margin="10 10 10 0" Grid.Row="3" />
 

@@ -6,6 +6,8 @@ using Microsoft.Win32;
 
 using Newtonsoft.Json;
 
+using snes_automatizer.Command;
+
 namespace snes_automatizer
 {
     public partial class MainWindow : Window
@@ -61,12 +63,18 @@ namespace snes_automatizer
 
         private void Log(string message)
         {
-            string finalMessage = DateTime.Now.ToString("yyyy-MM-dd  hh:mm:ss") + "\t" + message;
+            string finalMessage = DateTime.Now.ToString("yyyy-MM-dd  hh:mm:ss") + ":  " + message;
 
+            _viewModel.OutputMessages.Add(finalMessage);
+
+            this.OutputLB.ScrollIntoView(this.OutputLB.Items[this.OutputLB.Items.Count - 1]);
+
+            /*
             _viewModel.OutputMessages.Insert(0, finalMessage);
 
             if (_viewModel.OutputMessages.Count > 1000)
                 _viewModel.OutputMessages.RemoveAt(_viewModel.OutputMessages.Count - 1);
+            */
         }
 
         private void Log(string format, params object[] parameters)
@@ -167,7 +175,11 @@ namespace snes_automatizer
 
                 if (settings != null)
                 {
+                    _viewModel.Settings.PropertyChanged -= OnViewModelChanged;
                     _viewModel.Settings = settings;
+                    _viewModel.Settings.PropertyChanged += OnViewModelChanged;
+
+                    Log("Configuration file loaded:  {0}", fileName);
                 }
                 else
                 {
@@ -186,6 +198,7 @@ namespace snes_automatizer
             try
             {
                 System.IO.File.WriteAllText(fileName, json);
+                Log("Configuration file saved:  {0}", fileName);
             }
             catch (Exception ex)
             {
@@ -233,7 +246,7 @@ namespace snes_automatizer
             if (_validatedSettings == null ||
                 !_validatedSettings.ValidationPassed)
             {
-                Log("Validation Failed. Please see log for errors.");
+                Log("Setting not validated. Please validate before running.");
             }
             else
             {
@@ -250,22 +263,7 @@ namespace snes_automatizer
                 Log("Creating compilation commands...");
                 _compilation = _compiler.PrepareRun(_validatedSettings, files);
 
-                var builder = new StringBuilder();
-                foreach (var command in _compilation.CommandSet.CFileCommands)
-                {
-                    builder.AppendLine(command.Compile.GetFullCommandLine());
-                    builder.AppendLine(command.Optimize.GetFullCommandLine());
-                    builder.AppendLine(command.Constify.GetFullCommandLine());
-                    builder.AppendLine(command.Assemble.GetFullCommandLine());
-                }
-                foreach (var command in _compilation.CommandSet.AssemblerCommands)
-                {
-                    builder.AppendLine(command.GetFullCommandLine());
-                }
-
-                builder.AppendLine(_compilation.CommandSet.LinkCommand.GetFullCommandLine());
-
-                if (MessageBox.Show(builder.ToString()) == MessageBoxResult.OK)
+                if (MessageBox.Show("Execute Compilation?", "SNES Compiler", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
                 {
                     Log("Running Compiler...");
                     if (_compiler.ExecuteRun(_compilation))
@@ -277,6 +275,37 @@ namespace snes_automatizer
                         Log("Compilation Error. See log for details.");
                     }
                 }
+            }
+        }
+
+        private void OrderDownButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.ProjectFilesLB.SelectedIndex >= 0 &&
+                this.ProjectFilesLB.SelectedIndex < this.ProjectFilesLB.Items.Count - 1)
+            {
+                var swap = this.ProjectFilesLB.SelectedItem;
+                var index = this.ProjectFilesLB.SelectedIndex;
+
+                this.ProjectFilesLB.Items.Remove(swap);
+
+                this.ProjectFilesLB.Items.Insert(index + 1, swap);
+
+                this.ProjectFilesLB.SelectedIndex = index + 1;
+            }
+        }
+
+        private void OrderUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.ProjectFilesLB.SelectedIndex >= 1)
+            {
+                var swap = this.ProjectFilesLB.SelectedItem;
+                var index = this.ProjectFilesLB.SelectedIndex;
+
+                this.ProjectFilesLB.Items.Remove(swap);
+
+                this.ProjectFilesLB.Items.Insert(index - 1, swap);
+
+                this.ProjectFilesLB.SelectedIndex = index - 1;
             }
         }
     }
