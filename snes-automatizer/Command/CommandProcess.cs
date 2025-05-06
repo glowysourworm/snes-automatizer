@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 
+using snes_automatizer.Extension;
+
 namespace snes_automatizer.Command
 {
     public class CommandProcess

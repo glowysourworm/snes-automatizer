@@ -2,11 +2,10 @@
 using System.Text;
 
 using snes_automatizer.Command;
+using snes_automatizer.Extension;
 
 namespace snes_automatizer
 {
-    public delegate void SimpleEventHandler<T>(T sender);
-
     public class ValidatedSettings : ViewModelBase
     {
         public const string DEV_KIT_SNES = "devkitsnes";
@@ -294,7 +293,7 @@ namespace snes_automatizer
             // PROBLEM WITH WORKING DIRECTORY:  The compilers are creating .asm files that reference base directory
             //                                  files. (look for assembler compiler errors)
             //
-            Directory.SetCurrentDirectory(workingDir);
+            //Directory.SetCurrentDirectory(workingDir);
 
             // Procedure:  See automatizer.py: https://github.com/BrunoRNS/SNES-IDE/blob/main/libs/pvsneslib/devkitsnes/automatizer.py
             //

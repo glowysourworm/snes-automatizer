@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using snes_automatizer.Extension;
+
 namespace snes_automatizer.Command
 {
     public class SubProcessCommand

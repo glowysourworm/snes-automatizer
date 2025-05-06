@@ -1,14 +1,16 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Collections.Immutable;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Data;
 
 using Microsoft.Win32;
 
 using Newtonsoft.Json;
 
 using snes_automatizer.Command;
+using snes_automatizer.Extension;
 
 namespace snes_automatizer
 {
@@ -24,6 +26,7 @@ namespace snes_automatizer
         public MainWindow()
         {
             InitializeComponent();
+
 
             _viewModel = new ViewModel();
             _compiler = new Compiler();
@@ -53,14 +56,24 @@ namespace snes_automatizer
                     OpenConfiguration(configFile);
                 }
             }
+
+            // Sort descriptors for the project code files list box
+            this.ProjectFilesLB.Items.SortDescriptions.Clear();
+            this.ProjectFilesLB.Items.SortDescriptions.Add(new SortDescription("Order", ListSortDirection.Ascending));
         }
 
         private void OnViewModelChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             // This won't recurse (becuase the ObservableCollection itself doesn't change for adding the log message)
             Log("Settings Modified (" + e.PropertyName + ")");
-            ReloadFiles();
-            Log("Code files (*.c, *.asm) reloaded from disk");
+
+            // We have to filter this event to prevent extra calls during sorting
+            if (e.PropertyName == "ProjectFolder" ||
+                e.PropertyName == "PVSNESLIBFolder")
+            {
+                ReloadFiles();
+                Log("Code files (*.c, *.asm) reloaded from disk");
+            }
         }
 
         private void Log(string message)
@@ -88,22 +101,45 @@ namespace snes_automatizer
         {
             try
             {
-                _viewModel.CFiles.Clear();
-                _viewModel.AssemblerFiles.Clear();
+                // Code Files:  Must merge what is on disk with those currently in memory
+                //
 
-                _viewModel.CFiles.AddRange(Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.c", SearchOption.AllDirectories));
-                _viewModel.AssemblerFiles.AddRange(Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.asm", SearchOption.AllDirectories));
+                var files = new List<string>();
+                var index = 0;
 
-                this.ProjectFilesLB.Items.Clear();
-
-                // Add these manually; and let the user re-order them
-                foreach (var file in _viewModel.CFiles)
+                foreach (var file in Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.c", SearchOption.AllDirectories))
                 {
-                    this.ProjectFilesLB.Items.Add(new FileItem(file));
+                    files.Add(file);
+
+                    if (!_viewModel.Settings.CodeFiles.Any(x => x.Path == file))
+                    {
+                        _viewModel.Settings.CodeFiles.Add(new FileItem(file, index, CodeFileType.C));
+                    }
+
+                    index++;
                 }
-                foreach (var file in _viewModel.AssemblerFiles)
+                foreach (var file in Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.asm", SearchOption.AllDirectories))
                 {
-                    this.ProjectFilesLB.Items.Add(new FileItem(file));
+                    files.Add(file);
+
+                    if (!_viewModel.Settings.CodeFiles.Any(x => x.Path == file))
+                    {
+                        _viewModel.Settings.CodeFiles.Add(new FileItem(file, index, CodeFileType.Assembler));
+                    }
+
+                    index++;
+                }
+
+                // Prune
+                //
+                _viewModel.Settings.CodeFiles.RemoveWhere((x, index) => !files.Contains(x.Path));
+                _viewModel.Settings.CodeFiles.Sort(x => x.Order);
+
+                // Assign New Order Number
+                //
+                for (int fileIndex = 0; fileIndex <  _viewModel.Settings.CodeFiles.Count; fileIndex++)
+                {
+                    _viewModel.Settings.CodeFiles[fileIndex].Order = fileIndex;
                 }
             }
             catch (Exception ex)
@@ -182,6 +218,8 @@ namespace snes_automatizer
                     _viewModel.Settings.PropertyChanged += OnViewModelChanged;
 
                     Log("Configuration file loaded:  {0}", fileName);
+
+                    ReloadFiles();
                 }
                 else
                 {
@@ -225,7 +263,7 @@ namespace snes_automatizer
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var json = JsonConvert.SerializeObject(_viewModel.Settings);
+            var json = JsonConvert.SerializeObject(_viewModel.Settings, Formatting.Indented);
             var fileName = SaveFile("Json Files | *.json");
 
             if (!string.IsNullOrEmpty(fileName))
@@ -254,7 +292,7 @@ namespace snes_automatizer
             {
                 // Get files from list box in the order they were arranged
                 var files = new List<string>();
-                foreach (FileItem item in this.ProjectFilesLB.Items)
+                foreach (var item in _viewModel.Settings.CodeFiles.OrderBy(x => x.Order))
                 {
                     if (item.Included)
                     {
@@ -285,14 +323,16 @@ namespace snes_automatizer
             if (this.ProjectFilesLB.SelectedIndex >= 0 &&
                 this.ProjectFilesLB.SelectedIndex < this.ProjectFilesLB.Items.Count - 1)
             {
-                var swap = this.ProjectFilesLB.SelectedItem;
                 var index = this.ProjectFilesLB.SelectedIndex;
 
-                this.ProjectFilesLB.Items.Remove(swap);
+                var swap = _viewModel.Settings.CodeFiles[index];
+                var swapOther = _viewModel.Settings.CodeFiles[index + 1];
 
-                this.ProjectFilesLB.Items.Insert(index + 1, swap);
+                var order = swap.Order;
+                swap.Order = swapOther.Order;
+                swapOther.Order = order;
 
-                this.ProjectFilesLB.SelectedIndex = index + 1;
+                _viewModel.Settings.CodeFiles.Sort(x => x.Order);
             }
         }
 
@@ -300,14 +340,16 @@ namespace snes_automatizer
         {
             if (this.ProjectFilesLB.SelectedIndex >= 1)
             {
-                var swap = this.ProjectFilesLB.SelectedItem;
                 var index = this.ProjectFilesLB.SelectedIndex;
 
-                this.ProjectFilesLB.Items.Remove(swap);
+                var swap = _viewModel.Settings.CodeFiles[index];
+                var swapOther = _viewModel.Settings.CodeFiles[index - 1];
 
-                this.ProjectFilesLB.Items.Insert(index - 1, swap);
+                var order = swap.Order;
+                swap.Order = swapOther.Order;
+                swapOther.Order = order;
 
-                this.ProjectFilesLB.SelectedIndex = index - 1;
+                _viewModel.Settings.CodeFiles.Sort(x => x.Order);
             }
         }
 
@@ -322,6 +364,11 @@ namespace snes_automatizer
                 // Set Clipboard
                 Clipboard.SetText(message);
             }
+        }
+
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.OutputMessages.Clear();
         }
     }
 }

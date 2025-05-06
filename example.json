@@ -1,1 +1,32 @@
-{"ProjectFolder":"C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world","PVSNESLIBFolder":"C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\libs\\pvsneslib","MemoryMap":0,"Speed":0}
+{
+  "ProjectFolder": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world",
+  "PVSNESLIBFolder": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\libs\\pvsneslib",
+  "MemoryMap": 0,
+  "Speed": 0,
+  "CodeFiles": [
+    {
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\data.asm",
+      "Included": true,
+      "Order": 0,
+      "Type": 0
+    },
+    {
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\hdr.asm",
+      "Included": true,
+      "Order": 1,
+      "Type": 0
+    },
+    {
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\src\\hello_world.asm",
+      "Included": true,
+      "Order": 2,
+      "Type": 0
+    },
+    {
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\src\\hello_world.c",
+      "Included": true,
+      "Order": 3,
+      "Type": 1
+    }
+  ]
+}

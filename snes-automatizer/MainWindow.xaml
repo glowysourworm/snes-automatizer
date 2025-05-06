@@ -2,6 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:snes_automatizer="clr-namespace:snes_automatizer" 
+        xmlns:converter="clr-namespace:snes_automatizer.Converter" 
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         Background="#EEEEFF" Foreground="#555555" 
         Title="SNES Automatizer">
     <Window.Resources>
@@ -23,6 +25,7 @@
             <Setter Property="Margin" Value="5" />
             <Setter Property="Background" Value="#AFFFFFFF" />
         </Style>
+        <converter:LeftEllipsisConverter x:Key="LeftEllipsisConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -88,16 +91,16 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <ListBox x:Name="ProjectFilesLB">
+            <ListBox x:Name="ProjectFilesLB" ItemsSource="{Binding Settings.CodeFiles}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
+                        <Grid HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <CheckBox IsChecked="{Binding Included}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Path}" Margin="7 1 1 1" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" TextTrimming="CharacterEllipsis" />
+                            <CheckBox IsChecked="{Binding Included}" Margin="1" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Path, Converter={StaticResource LeftEllipsisConverter}}" Margin="7 1 1 1" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -112,7 +115,15 @@
             </StackPanel>
         </Grid>
 
-        <TextBlock Text="Output" FontSize="16" Margin="10 10 10 0" Grid.Row="3" />
+        <Grid Margin="10 10 10 0" Grid.Row="3" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Output" FontSize="16" />
+            <Button Content="Clear" x:Name="ClearButton" Click="ClearButton_Click" Margin="10 0 0 0" Grid.Column="1" Width="60" FontSize="12" />
+        </Grid>
+        
 
         <!-- Output Log -->
         <ListView x:Name="OutputLB" ItemsSource="{Binding OutputMessages}" Foreground="Black" Grid.Row="4" Margin="10">
