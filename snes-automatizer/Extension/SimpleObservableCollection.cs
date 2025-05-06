@@ -29,6 +29,17 @@ namespace snes_automatizer.Extension
             Hook();
         }
 
+        public void RemoveBy(SimpleLinqPredicate<T> predicate)
+        {
+            for (int index = this.Count - 1; index >= 0; index--)
+            {
+                if (predicate(this[index], index))
+                {
+                    this.RemoveAt(index);
+                }
+            }
+        }
+
         public void Sort<TResult>(Func<T, TResult> keySelector)
         {
             _sorting = true;

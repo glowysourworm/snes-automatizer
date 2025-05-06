@@ -132,7 +132,7 @@ namespace snes_automatizer
 
                 // Prune
                 //
-                _viewModel.Settings.CodeFiles.RemoveWhere((x, index) => !files.Contains(x.Path));
+                _viewModel.Settings.CodeFiles.RemoveBy((x, index) => !files.Contains(x.Path));
                 _viewModel.Settings.CodeFiles.Sort(x => x.Order);
 
                 // Assign New Order Number
@@ -369,6 +369,12 @@ namespace snes_automatizer
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.OutputMessages.Clear();
+        }
+
+        private void ProjectFilesRefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.Settings.CodeFiles.Clear();
+            ReloadFiles();
         }
     }
 }

@@ -21,7 +21,7 @@ namespace snes_automatizer.Command
                 var process = new Process();
                 process.StartInfo.FileName = _command.ExeFilePath;
                 process.StartInfo.RedirectStandardInput = true;
-                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardOutput = false;           // This may be the actual product of the process, so be careful!
                 process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
@@ -45,9 +45,8 @@ namespace snes_automatizer.Command
                 };
                 */
                 process.Start();
-                process.BeginOutputReadLine();
+                //process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-                process.StandardInput.WriteLine("Process Started:  " + _command.ExeFilePath);
                 process.StandardInput.Flush();
                 process.StandardInput.Close();
 
