@@ -3,104 +3,17 @@ using System.Text;
 
 using snes_automatizer.Command;
 using snes_automatizer.Extension;
+using snes_automatizer.Model;
+using snes_automatizer.Properties;
+
+using Settings = snes_automatizer.Model.Settings;
 
 namespace snes_automatizer
 {
-    public class ValidatedSettings : ViewModelBase
-    {
-        public const string DEV_KIT_SNES = "devkitsnes";
-        public const string DEV_KIT_SNES_INCLUDE = "devkitsnes\\include";
-        public const string TOOLS = "tools";
-        public const string ASM_COMPILER = "bin\\wla-65816.exe";
-        public const string C_COMPILER = "bin\\816-tcc.exe";
-        public const string LINKER = "bin\\wlalink.exe";
-        public const string OPTIMIZER = "816-opt.exe";
-        public const string CONSTIFIER = "constify.exe";
-        public const string HIROM_FAST = "lib\\HiROM_FastROM";
-        public const string LOROM_FAST = "lib\\LoROM_FastROM";
-        public const string HIROM_SLOW = "lib\\HiROM_SlowROM";
-        public const string LOROM_SLOW = "lib\\LoROM_SlowROM";
-
-        public bool ValidationPassed { get; set; }
-        public Settings Settings { get; set; }
-
-        /// <summary>
-        /// Memory Map Folder (calculated based on HIROM / LOROM / FAST / SLOW settings
-        /// </summary>
-        public string MemoryMapFolder { get; set; }
-        /// <summary>
-        /// Tools folder from the base pvsneslib path
-        /// </summary>
-        public string ToolsFolder { get; set; }
-        /// <summary>
-        /// Devkit folder from the base pvsneslib (devkitsnes)
-        /// </summary>
-        public string DevKitFolder { get; set; }
-
-        /// <summary>
-        /// Devkit includes folder (devkitsnes)
-        /// </summary>
-        public string DevKitIncludeFolder { get; set; }
-
-
-        /// <summary>
-        /// Compiler path for 816-tcc.exe
-        /// </summary>
-        public string CCompilerPath { get; set; }
-        /// <summary>
-        /// Compiler path for wla-65816.exe
-        /// </summary>
-        public string AsmCompilerPath { get; set; }
-        /// <summary>
-        /// Linker path for wlalink.exe
-        /// </summary>
-        public string LinkerPath { get; set; }
-        /// <summary>
-        /// Path to optimizer 816-opt.exe
-        /// </summary>
-        public string OptimizerPath { get; set; }
-
-        /// <summary>
-        /// Path to constify.exe
-        /// </summary>
-        public string ConstifierPath { get; set; }
-
-        public ValidatedSettings(Settings settings)
-        {
-            this.Settings = settings;
-            this.ValidationPassed = false;
-
-            // Base
-            this.DevKitFolder = Path.Combine(settings.PVSNESLIBFolder, DEV_KIT_SNES);
-            this.DevKitIncludeFolder = Path.Combine(settings.PVSNESLIBFolder, DEV_KIT_SNES_INCLUDE);
-            this.ToolsFolder = Path.Combine(settings.PVSNESLIBFolder, TOOLS);
-
-            // Base -> Devkit
-            this.AsmCompilerPath = Path.Combine(this.DevKitFolder, ASM_COMPILER);
-            this.CCompilerPath = Path.Combine(this.DevKitFolder, C_COMPILER);
-            this.LinkerPath = Path.Combine(this.DevKitFolder, LINKER);
-
-            // Base -> Tools
-            this.OptimizerPath = Path.Combine(this.ToolsFolder, OPTIMIZER);
-            this.ConstifierPath = Path.Combine(this.ToolsFolder, CONSTIFIER);
-
-            if (settings.MemoryMap == MemoryMapSettings.HIROM)
-            {
-                this.MemoryMapFolder = settings.Speed == SpeedSettings.FAST ? Path.Combine(settings.PVSNESLIBFolder, HIROM_FAST) :
-                                                                              Path.Combine(settings.PVSNESLIBFolder, HIROM_SLOW);
-            }
-            else
-            {
-                this.MemoryMapFolder = settings.Speed == SpeedSettings.FAST ? Path.Combine(settings.PVSNESLIBFolder, LOROM_FAST) :
-                                                                              Path.Combine(settings.PVSNESLIBFolder, LOROM_SLOW);
-            }
-        }
-    }
-
     public class Compiler
     {
-        public event SimpleEventHandler<string> RunMessageEvent;
-        public event SimpleEventHandler<string> ValidationMessageEvent;
+        public event SimpleEventHandler<string, MessageSeverity> RunMessageEvent;
+        public event SimpleEventHandler<string, MessageSeverity> ValidationMessageEvent;
 
         public const string LINK_FILE_NAME = "linkfile";
         public const string OUTPUT_FILE_NAME = "output.sfc";
@@ -117,31 +30,31 @@ namespace snes_automatizer
             // Check that files / folders exist
             if (string.IsNullOrEmpty(settings.ProjectFolder) || !Directory.Exists(settings.ProjectFolder))
             {
-                OnValidationMessage("Project Folder must be set to your source code base directory");
+                OnValidationMessage("Project Folder must be set to your source code base directory", MessageSeverity.Error);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(settings.PVSNESLIBFolder) || !Directory.Exists(settings.PVSNESLIBFolder))
             {
-                OnValidationMessage("pvsneslib Folder must be set to base directory for pvsneslib");
+                OnValidationMessage("pvsneslib Folder must be set to base directory for pvsneslib", MessageSeverity.Error);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.DevKitFolder) || !Directory.Exists(result.DevKitFolder))
             {
-                OnValidationMessage("devkitsnes Folder must be set to base directory for devkitsnes");
+                OnValidationMessage("devkitsnes Folder must be set to base directory for devkitsnes", MessageSeverity.Error);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.DevKitIncludeFolder) || !Directory.Exists(result.DevKitIncludeFolder))
             {
-                OnValidationMessage("devkitsnes/include Folder be available for devkitsnes");
+                OnValidationMessage("devkitsnes/include Folder be available for devkitsnes", MessageSeverity.Error);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.ToolsFolder) || !Directory.Exists(result.ToolsFolder))
             {
-                OnValidationMessage("Tools Folder must be set to tools directory of pvsneslib");
+                OnValidationMessage("Tools Folder must be set to tools directory of pvsneslib", MessageSeverity.Error);
                 result.ValidationPassed = false;
                 return result;
             }
@@ -149,31 +62,39 @@ namespace snes_automatizer
             // Compilers
             if (string.IsNullOrEmpty(result.CCompilerPath) || !Path.Exists(result.CCompilerPath))
             {
-                OnValidationMessage("C compiler path is invalid: {0}", result.CCompilerPath);
+                OnValidationMessage("C compiler path is invalid: {0}", MessageSeverity.Error, result.CCompilerPath);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.AsmCompilerPath) || !Path.Exists(result.AsmCompilerPath))
             {
-                OnValidationMessage("Assembler compiler path is invalid: {0}", result.AsmCompilerPath);
+                OnValidationMessage("Assembler compiler path is invalid: {0}", MessageSeverity.Error, result.AsmCompilerPath);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.LinkerPath) || !Path.Exists(result.LinkerPath))
             {
-                OnValidationMessage("Linker path is invalid: {0}", result.LinkerPath);
+                OnValidationMessage("Linker path is invalid: {0}", MessageSeverity.Error, result.LinkerPath);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.OptimizerPath) || !Path.Exists(result.OptimizerPath))
             {
-                OnValidationMessage("Optimizer path is invalid:  {0}", result.OptimizerPath);
+                OnValidationMessage("Optimizer path is invalid:  {0}", MessageSeverity.Error, result.OptimizerPath);
                 result.ValidationPassed = false;
                 return result;
             }
             if (string.IsNullOrEmpty(result.ConstifierPath) || !Path.Exists(result.ConstifierPath))
             {
-                OnValidationMessage("Constifier path is invalid: {0}", result.ConstifierPath);
+                OnValidationMessage("Constifier path is invalid: {0}", MessageSeverity.Error, result.ConstifierPath);
+                result.ValidationPassed = false;
+                return result;
+            }
+
+            // Optional Resource Compilers
+            if (string.IsNullOrEmpty(result.GFX4SNESPath) || !Path.Exists(result.GFX4SNESPath))
+            {
+                OnValidationMessage("Graphics compiler path is invalid: {0}", MessageSeverity.Error, result.ConstifierPath);
                 result.ValidationPassed = false;
                 return result;
             }
@@ -189,48 +110,48 @@ namespace snes_automatizer
             return result;
 
         }
-        public Compilation PrepareRun(ValidatedSettings settings, IEnumerable<string> files)
+        public Compilation PrepareRun(ValidatedSettings settings, IEnumerable<FileItem> codeFiles, IEnumerable<FileItem> imageFiles)
         {
             var ccommands = new List<CFileCommandSet>();
             var asmCommands = new List<SubProcessCommand>();
+            var resourceCommands = new List<SubProcessCommand>();
             var linkFilePath = Path.Combine(settings.Settings.ProjectFolder, LINK_FILE_NAME);
-            var linkFile = new StringBuilder();
             var outputFile = Path.Combine(settings.Settings.ProjectFolder, OUTPUT_FILE_NAME);
 
             // C-Files:  For each c file, compile the following commands:  compile -> optimize -> constify -> assemble
             //
-            foreach (var file in files.Where(x => x.EndsWith(".c")))
+            foreach (var file in codeFiles.Where(x => x.Type == CodeFileType.C))
             {
                 var compile = new SubProcessCommand();
                 compile.ExeFilePath = settings.CCompilerPath;
 
                 // Create output files for the compiler to use
-                var psFile = file.Replace(".c", ".ps");
-                var aspFile = file.Replace(".c", ".asp");
-                var asmFile = file.Replace(".c", ".asm");
-                var objFile = file.Replace(".c", ".obj");
+                var psFile = file.Path.Replace(".c", ".ps");
+                var aspFile = file.Path.Replace(".c", ".asp");
+                var asmFile = file.Path.Replace(".c", ".asm");
+                var objFile = file.Path.Replace(".c", ".obj");
 
                 // TODO: MAKE CONST + SOME COMMENTS FOR COMMAND OPTIONS!
                 if (settings.Settings.MemoryMap == MemoryMapSettings.HIROM)
-                {                   
+                {
                     if (settings.Settings.Speed == SpeedSettings.FAST)
                     {
-                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file, "-H", "-F", "-o", psFile);
+                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file.Path, "-H", "-F", "-o", psFile);
                     }
                     else
                     {
-                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file, "-H", "-o", psFile);
+                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file.Path, "-H", "-o", psFile);
                     }
                 }
                 else
                 {
                     if (settings.Settings.Speed == SpeedSettings.FAST)
                     {
-                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file, "-F", "-o", psFile);
+                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file.Path, "-F", "-o", psFile);
                     }
                     else
                     {
-                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file, "-o", psFile);
+                        compile.Arguments.AddRange("-I", settings.DevKitIncludeFolder, "-Wall", "-c", file.Path, "-o", psFile);
                     }
                 }
 
@@ -242,8 +163,8 @@ namespace snes_automatizer
                 constify.ExeFilePath = settings.ConstifierPath;
                 assemble.ExeFilePath = settings.AsmCompilerPath;
 
-                optimize.Arguments.Add(psFile);
-                constify.Arguments.AddRange(file, aspFile, asmFile);
+                optimize.Arguments.AddRange(psFile, ">", aspFile);                       // The Standard Output for this one IS the .asp file
+                constify.Arguments.AddRange(file.Path, aspFile, asmFile);                // May have to use just the FILENAME(S), here, and make sure we're compiling out of the same directory
                 assemble.Arguments.AddRange("-d", "-s", "-x", "-o", objFile, asmFile);
 
                 ccommands.Add(new CFileCommandSet(compile, optimize, constify, assemble));
@@ -251,11 +172,11 @@ namespace snes_automatizer
 
             // Asm Files:  For each assembler file, run the assembler compiler
             //
-            foreach (var file in files.Where(x => x.EndsWith(".asm")))
+            foreach (var file in codeFiles.Where(x => x.Type == CodeFileType.Assembler))
             {
                 var command = new SubProcessCommand();
-                command.ExeFilePath = file;
-                command.Arguments.AddRange("-d", "-s", "-x", "-o", file.Replace(".asm", ".obj"), file);
+                command.ExeFilePath = settings.AsmCompilerPath;
+                command.Arguments.AddRange("-d", "-s", "-x", "-o", file.Path.Replace(".asm", ".obj"), file.Path);
 
                 asmCommands.Add(command);
             }
@@ -264,29 +185,26 @@ namespace snes_automatizer
             //             followed by the MemoryMapFolder (lib directory) .obj files.
             //
 
-            // Header
-            linkFile.AppendLine("[objects]");
+            // (we should be weeding out our files from the project directory tree.. there's lots TBD to handle this whole problem)
+            var linkerFiles = codeFiles.Select(x => x.Path.Replace(".c", ".obj").Replace(".asm", ".obj")).Distinct();
 
-            // Our .obj files
-            foreach (var file in files)
-            {
-                linkFile.AppendLine(file.Replace(".c", ".obj").Replace(".asm", ".obj"));
-            }
-
-            // Lib .obj files
-            foreach (var file in Directory.GetFiles(settings.MemoryMapFolder, "*.obj"))
-            {
-                linkFile.AppendLine(file);
-            }
-
-            // Write link file to disk
-            System.IO.File.WriteAllText(linkFilePath, linkFile.ToString());
+            CreateLinkerFile(linkFilePath, settings.MemoryMapFolder, linkerFiles);
 
             var linkCommand = new SubProcessCommand();
             linkCommand.ExeFilePath = settings.LinkerPath;
-            linkCommand.Arguments.AddRange("-d", "-s", "-c", "-v", "-A", "-L", settings.MemoryMapFolder, linkFilePath, settings.Settings.ProjectFolder);
+            linkCommand.Arguments.AddRange("-d", "-s", "-c", "-v", "-A", "-L", settings.MemoryMapFolder, linkFilePath, Path.Combine(settings.Settings.ProjectFolder, OUTPUT_FILE_NAME));
 
-            return new Compilation(new CompilationCommandSet(ccommands, asmCommands, linkCommand));
+            // Resource Files
+            foreach (var file in imageFiles)
+            {
+                var command = new SubProcessCommand();
+                command.ExeFilePath = settings.GFX4SNESPath;
+                command.Arguments.AddRange("-i", file.Path, "-t", file.Type == CodeFileType.ResourceBmp ? "bmp" : "png", "-m");
+
+                resourceCommands.Add(command);
+            }
+
+            return new Compilation(new CompilationCommandSet(ccommands, asmCommands, resourceCommands, linkCommand));
         }
         public bool ExecuteRun(Compilation compilation, string workingDir)
         {
@@ -308,36 +226,36 @@ namespace snes_automatizer
                 var constifyProcess = new CommandProcess(ccommand.Constify);
                 var assembleProcess = new CommandProcess(ccommand.Assemble);
 
-                OnRunMessage("Executing Command:  {0}", ccommand.Compile.GetFullCommandLine());
+                OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, ccommand.Compile.GetFullCommandLine());
 
                 // Run Commands Synchronously
-                if (!compileProcess.Run(message => OnRunMessage(message)))
+                if (!compileProcess.Run((message, severity) => OnRunMessage(message, severity)))
                 {
-                    OnRunMessage("Compilation Process Error:  " + ccommand.Compile.GetFullCommandLine());
+                    OnRunMessage("Compilation Process Error:  " + ccommand.Compile.GetFullCommandLine(), MessageSeverity.Error);
                     return false;
                 }
 
-                OnRunMessage("Executing Command:  {0}", ccommand.Optimize.GetFullCommandLine());
+                OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, ccommand.Optimize.GetFullCommandLine());
 
-                if (!optimizeProcess.Run(message => OnRunMessage(message)))
+                if (!optimizeProcess.Run((message, severity) => OnRunMessage(message, severity)))
                 {
-                    OnRunMessage("Optimizer Process Error:  " + ccommand.Optimize.GetFullCommandLine());
+                    OnRunMessage("Optimizer Process Error:  " + ccommand.Optimize.GetFullCommandLine(), MessageSeverity.Error);
                     return false;
                 }
 
-                OnRunMessage("Executing Command:  {0}", ccommand.Constify.GetFullCommandLine());
+                OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, ccommand.Constify.GetFullCommandLine());
 
-                if (!constifyProcess.Run(message => OnRunMessage(message)))
+                if (!constifyProcess.Run((message, severity) => OnRunMessage(message, severity)))
                 {
-                    OnRunMessage("Constify Process Error:  " + ccommand.Constify.GetFullCommandLine());
+                    OnRunMessage("Constify Process Error:  " + ccommand.Constify.GetFullCommandLine(), MessageSeverity.Error);
                     return false;
                 }
 
-                OnRunMessage("Executing Command:  {0}", ccommand.Assemble.GetFullCommandLine());
+                OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, ccommand.Assemble.GetFullCommandLine());
 
-                if (!assembleProcess.Run(message => OnRunMessage(message)))
+                if (!assembleProcess.Run((message, severity) => OnRunMessage(message, severity)))
                 {
-                    OnRunMessage("Assembler Process Error:  " + ccommand.Assemble.GetFullCommandLine());
+                    OnRunMessage("Assembler Process Error:  " + ccommand.Assemble.GetFullCommandLine(), MessageSeverity.Error);
                     return false;
                 }
             }
@@ -346,23 +264,36 @@ namespace snes_automatizer
             {
                 var process = new CommandProcess(asmCommand);
 
-                OnRunMessage("Executing Command:  {0}", asmCommand.GetFullCommandLine());
+                OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, asmCommand.GetFullCommandLine());
 
-                if (!process.Run(message => OnRunMessage(message)))
+                if (!process.Run((message, severity) => OnRunMessage(message, severity)))
                 {
-                    OnRunMessage("Assembler Process Error:  " + asmCommand.GetFullCommandLine());
+                    OnRunMessage("Assembler Process Error:  " + asmCommand.GetFullCommandLine(), MessageSeverity.Error);
                     return false;
                 }
             }
 
             var linker = new CommandProcess(compilation.CommandSet.LinkCommand);
 
-            OnRunMessage("Executing Command:  {0}", compilation.CommandSet.LinkCommand.GetFullCommandLine());
+            OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, compilation.CommandSet.LinkCommand.GetFullCommandLine());
 
-            if (!linker.Run(message => OnRunMessage(message)))
+            if (!linker.Run((message, severity) => OnRunMessage(message, severity)))
             {
-                OnRunMessage("Linker Process Error:  " + compilation.CommandSet.LinkCommand.GetFullCommandLine());
+                OnRunMessage("Linker Process Error:  " + compilation.CommandSet.LinkCommand.GetFullCommandLine(), MessageSeverity.Error);
                 return false;
+            }
+
+            foreach (var command in compilation.CommandSet.ResourceCommands)
+            {
+                var process = new CommandProcess(command);
+
+                OnRunMessage("Executing Command:  {0}", MessageSeverity.Info, command.GetFullCommandLine());
+
+                if (!process.Run((message, severity) => OnRunMessage(message, severity)))
+                {
+                    OnRunMessage("Resource Process Error:  " + command.GetFullCommandLine(), MessageSeverity.Error);
+                    return false;
+                }
             }
 
             OnRunMessage("Compilation Complete!");
@@ -370,25 +301,65 @@ namespace snes_automatizer
             return true;
         }
 
-        private void OnValidationMessage(string format, params object[] parameters)
+        /// <summary>
+        /// Creates (extraneous) linker file from the provided .obj files. This is also done during run preparation from
+        /// the compiler (future) products by substituting the file extension.
+        /// </summary>
+        public bool CreateLinkerFile(string path, string memoryMapFolder, IEnumerable<string> ourObjFiles)
+        {
+            // Link File:  Create link file from the .obj files, GIVEN IN THE ORDER THEY WERE PRESENTED,
+            //             followed by the MemoryMapFolder (lib directory) .obj files.
+            //
+
+            try
+            {
+                var linkFile = new StringBuilder();
+
+                // Header
+                linkFile.AppendLine("[objects]");
+
+                // Our .obj files
+                foreach (var file in ourObjFiles)
+                {
+                    linkFile.AppendLine(file);
+                }
+
+                // Lib .obj files
+                foreach (var file in Directory.GetFiles(memoryMapFolder, "*.obj"))
+                {
+                    linkFile.AppendLine(file);
+                }
+
+                // Write link file to disk
+                System.IO.File.WriteAllText(path, linkFile.ToString());
+                return true;
+            }
+            catch (Exception e)
+            {
+                OnValidationMessage("Error Creating Linker File:  " + e.ToString(), MessageSeverity.Error);
+                return false;
+            }
+        }
+
+        private void OnValidationMessage(string format, MessageSeverity severity = MessageSeverity.Info, params object[] parameters)
         {
             if (this.ValidationMessageEvent != null)
-                this.ValidationMessageEvent(string.Format(format, parameters));
+                this.ValidationMessageEvent(string.Format(format, parameters), severity);
         }
-        private void OnRunMessage(string format, params object[] parameters)
+        private void OnRunMessage(string format, MessageSeverity severity = MessageSeverity.Info, params object[] parameters)
         {
             if (this.RunMessageEvent != null)
-                this.RunMessageEvent(string.Format(format, parameters));
+                this.RunMessageEvent(string.Format(format, parameters), severity);
         }
-        private void OnValidationMessage(string message)
+        private void OnValidationMessage(string message, MessageSeverity severity = MessageSeverity.Info)
         {
             if (this.ValidationMessageEvent != null)
-                this.ValidationMessageEvent(message);
+                this.ValidationMessageEvent(message, severity);
         }
-        private void OnRunMessage(string message)
+        private void OnRunMessage(string message, MessageSeverity severity = MessageSeverity.Info)
         {
             if (this.RunMessageEvent != null)
-                this.RunMessageEvent(message);
+                this.RunMessageEvent(message, severity);
         }
     }
 }

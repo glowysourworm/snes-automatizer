@@ -1,0 +1,35 @@
+Usage : smconv [options] [input]...
+
+
+Soundbank options:
+-s                Soundbank creation mode
+                  (Can specify multiple files with soundbank mode.)
+                  (Otherwise specify only one file for SPC creation.)
+                  (Default is SPC creation mode)
+-b#               Bank number specification (Default is 5)
+
+File options:
+-o [file]         Specify output file or file base
+                  (Specify SPC file for -s option)
+                  (Specify filename base for soundbank creation)
+                  (Required for soundbank mode)
+
+
+Memory options:
+-i                Use HIROM mapping mode for soundbank.
+-f                Check size of IT files with 1st IT file (useful for effects
+
+
+Misc options
+-V                Enable verbose output
+-h                Show help
+-v                Show version
+
+Tips:
+Typical options to create soundbank for project:
+  smconv -s -o build/soundbank -h input1.it input2.it
+
+And for IT->SPC:
+  smconv input.it
+
+Use -V to view how much RAM the modules will use.

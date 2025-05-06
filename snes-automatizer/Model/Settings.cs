@@ -1,10 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Windows;
 
 using snes_automatizer.Extension;
 
-namespace snes_automatizer
+namespace snes_automatizer.Model
 {
     // TODO: Bring in some documentation for high-level compiler settings
     public enum MemoryMapSettings
@@ -28,7 +27,18 @@ namespace snes_automatizer
     public enum CodeFileType
     {
         Assembler = 0,
-        C = 1
+        C = 1,
+        ResourceBmp = 2,
+        ResourcePng = 3,
+    }
+
+    public enum MessageSeverity
+    {
+        Info = 0,
+        Warning = 1,
+        Error = 2,
+        CommandLineApplicationStdOut = 3,
+        CommandLineApplicationError = 4
     }
 
     public class FileItem : ViewModelBase
@@ -43,22 +53,22 @@ namespace snes_automatizer
         public string Path
         {
             get { return _path; }
-            set { this.RaiseAndSetIfChanged(ref _path, value); }
+            set { RaiseAndSetIfChanged(ref _path, value); }
         }
         public bool Included
         {
             get { return _included; }
-            set { this.RaiseAndSetIfChanged(ref _included, value); }
+            set { RaiseAndSetIfChanged(ref _included, value); }
         }
         public int Order
         {
             get { return _order; }
-            set { this.RaiseAndSetIfChanged(ref _order, value); }
+            set { RaiseAndSetIfChanged(ref _order, value); }
         }
         public CodeFileType Type
         {
             get { return _type; }
-            set { this.RaiseAndSetIfChanged(ref _type, value); }
+            set { RaiseAndSetIfChanged(ref _type, value); }
         }
         public FileItem()
         {
@@ -88,6 +98,7 @@ namespace snes_automatizer
         MemoryMapSettings _memoryMap;
         SpeedSettings _speed;
         SimpleObservableCollection<FileItem> _codeFiles;
+        SimpleObservableCollection<FileItem> _imageFiles;
 
         /// <summary>
         /// Base folder for your project code. This program will search through all your files to look
@@ -96,7 +107,7 @@ namespace snes_automatizer
         public string ProjectFolder
         {
             get { return _projectFolder; }
-            set { this.RaiseAndSetIfChanged(ref _projectFolder, value); }
+            set { RaiseAndSetIfChanged(ref _projectFolder, value); }
         }
 
         /// <summary>
@@ -105,24 +116,29 @@ namespace snes_automatizer
         public string PVSNESLIBFolder
         {
             get { return _pvSnesLibFolder; }
-            set { this.RaiseAndSetIfChanged(ref _pvSnesLibFolder, value); }
+            set { RaiseAndSetIfChanged(ref _pvSnesLibFolder, value); }
         }
 
         public MemoryMapSettings MemoryMap
         {
             get { return _memoryMap; }
-            set { this.RaiseAndSetIfChanged(ref _memoryMap, value); }
+            set { RaiseAndSetIfChanged(ref _memoryMap, value); }
         }
         public SpeedSettings Speed
         {
             get { return _speed; }
-            set { this.RaiseAndSetIfChanged(ref _speed, value); }
+            set { RaiseAndSetIfChanged(ref _speed, value); }
         }
 
         public SimpleObservableCollection<FileItem> CodeFiles
         {
             get { return _codeFiles; }
-            set { this.RaiseAndSetIfChanged(ref _codeFiles, value); }
+            set { RaiseAndSetIfChanged(ref _codeFiles, value); }
+        }
+        public SimpleObservableCollection<FileItem> ImageFiles
+        {
+            get { return _imageFiles; }
+            set { RaiseAndSetIfChanged(ref _imageFiles, value); }
         }
 
         public Settings()
@@ -130,39 +146,20 @@ namespace snes_automatizer
             this.ProjectFolder = "";
             this.PVSNESLIBFolder = "";
             this.CodeFiles = new SimpleObservableCollection<FileItem>();
+            this.ImageFiles = new SimpleObservableCollection<FileItem>();
 
             this.CodeFiles.ItemPropertyChanged += CodeFiles_ItemPropertyChanged;
+            this.ImageFiles.ItemPropertyChanged += ImageFiles_ItemPropertyChanged;
+        }
+
+        private void ImageFiles_ItemPropertyChanged(SimpleObservableCollection<FileItem> sender, FileItem arg1, System.ComponentModel.PropertyChangedEventArgs arg2)
+        {
+            OnPropertyChanged("ImageFiles");
         }
 
         private void CodeFiles_ItemPropertyChanged(SimpleObservableCollection<FileItem> sender, FileItem arg1, System.ComponentModel.PropertyChangedEventArgs arg2)
         {
-            this.OnPropertyChanged("CodeFiles");
-        }
-    }
-
-    public class ViewModel : ViewModelBase
-    {
-        Settings _settings;
-        ObservableCollection<string> _outputMessages;
-
-        public Settings Settings
-        {
-            get { return _settings; }
-            set { this.RaiseAndSetIfChanged(ref _settings, value); }
-        }
-
-        public ObservableCollection<string> OutputMessages
-        {
-            get { return _outputMessages; }
-            set { this.RaiseAndSetIfChanged(ref _outputMessages, value); }
-        }
-
-
-
-        public ViewModel()
-        {
-            this.Settings = new Settings();
-            this.OutputMessages = new ObservableCollection<string>();
+            OnPropertyChanged("CodeFiles");
         }
     }
 }

@@ -1,0 +1,10 @@
+Usage: [options] input-file output-file
+Options:
+  -?, --help                   Display this help message
+  -v, --version                Display the version
+  -e, --encode                 Encode WAV -> BRR
+  -d, --decode                 Decode BRR -> WAV
+  -t, --transcode              Transcode WAV -> (BRR) -> WAV
+  -l, --loop-start             Set the loop start sample
+  -p, --pitch                  Set the pitch rate for decoding
+  -g, --enable-gauss           Enable gaussian filtering during decoding

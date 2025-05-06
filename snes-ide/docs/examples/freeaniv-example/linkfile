@@ -1,0 +1,8 @@
+[objects]
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\freeaniv-example\data.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\freeaniv-example\freeaniv.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\docs\examples\freeaniv-example\hdr.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_SlowROM\crt0_snes.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_SlowROM\libc.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_SlowROM\libm.obj
+C:\Backup\_Source\Git\snes-automatizer\snes-ide\libs\pvsneslib\lib\LoROM_SlowROM\libtcc.obj

@@ -2,6 +2,7 @@
 using System.Windows;
 
 using snes_automatizer.Extension;
+using snes_automatizer.Model;
 
 namespace snes_automatizer.Command
 {
@@ -14,7 +15,7 @@ namespace snes_automatizer.Command
             _command = command;
         }
 
-        public bool Run(SimpleEventHandler<string> messageCallback)
+        public bool Run(SimpleEventHandler<string, MessageSeverity> messageCallback)
         {
             try
             {
@@ -31,7 +32,7 @@ namespace snes_automatizer.Command
                     // Must pass this to the dispacther
                     Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, () =>
                     {
-                        messageCallback(args.Data ?? "");
+                        messageCallback(args.Data ?? "", MessageSeverity.CommandLineApplicationError);
                     });
                 };
                 /*
@@ -56,7 +57,7 @@ namespace snes_automatizer.Command
             }
             catch (Exception ex)
             {
-                messageCallback("Error Running Process:  " + ex.ToString());
+                messageCallback("Error Running Process:  " + ex.ToString(), MessageSeverity.Error);
 
                 return false;
             }

@@ -1,26 +1,40 @@
 {
-  "ProjectFolder": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world",
+  "ProjectFolder": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\freeaniv-example",
   "PVSNESLIBFolder": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\libs\\pvsneslib",
   "MemoryMap": 0,
-  "Speed": 0,
+  "Speed": 1,
   "CodeFiles": [
     {
-      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\data.asm",
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\freeaniv-example\\freeaniv.c",
       "Included": true,
       "Order": 0,
-      "Type": 0
+      "Type": 1
     },
     {
-      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\hdr.asm",
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\freeaniv-example\\data.asm",
       "Included": true,
       "Order": 1,
       "Type": 0
     },
     {
-      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\hello_world\\src\\hello_world.c",
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\freeaniv-example\\hdr.asm",
       "Included": true,
       "Order": 2,
-      "Type": 1
+      "Type": 0
+    }
+  ],
+  "ImageFiles": [
+    {
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\freeaniv-example\\samus-styalized-invert.bmp",
+      "Included": true,
+      "Order": 0,
+      "Type": 2
+    },
+    {
+      "Path": "C:\\Backup\\_Source\\Git\\snes-automatizer\\snes-ide\\docs\\examples\\freeaniv-example\\pvsneslibfont.png",
+      "Included": true,
+      "Order": 1,
+      "Type": 3
     }
   ]
 }

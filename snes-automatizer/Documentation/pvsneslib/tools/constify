@@ -1,0 +1,9 @@
+Usage: constify.exe [options] cfile asmfile output...
+
+Section options:
+-s#name           Change default .rodata to .#name section
+
+Misc options:
+-h                Display this information
+-q                Quiet mode
+-v                Display constify version information

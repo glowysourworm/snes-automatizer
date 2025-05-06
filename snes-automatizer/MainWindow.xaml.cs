@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 
 using snes_automatizer.Command;
 using snes_automatizer.Extension;
+using snes_automatizer.Model;
 
 namespace snes_automatizer
 {
@@ -76,11 +77,14 @@ namespace snes_automatizer
             }
         }
 
-        private void Log(string message)
+        private void Log(string message, MessageSeverity severity = MessageSeverity.Info)
         {
-            string finalMessage = DateTime.Now.ToString("yyyy-MM-dd  hh:mm:ss") + ":  " + message;
-
-            _viewModel.OutputMessages.Add(finalMessage);
+            _viewModel.OutputMessages.Add(new OutputMessage()
+            {
+                Message = message,
+                Severity = severity,
+                Timestamp = DateTime.Now
+            });
 
             this.OutputLB.ScrollIntoView(this.OutputLB.Items[this.OutputLB.Items.Count - 1]);
 
@@ -92,9 +96,9 @@ namespace snes_automatizer
             */
         }
 
-        private void Log(string format, params object[] parameters)
+        private void Log(string format, MessageSeverity severity = MessageSeverity.Info, params object[] parameters)
         {
-            Log(string.Format(format, parameters));
+            Log(string.Format(format, parameters), severity);
         }
 
         private void ReloadFiles()
@@ -104,12 +108,15 @@ namespace snes_automatizer
                 // Code Files:  Must merge what is on disk with those currently in memory
                 //
 
-                var files = new List<string>();
+                var codeFiles = new List<string>();
+                var imageFiles = new List<string>();
                 var index = 0;
+                var resourceIndex = 0;
 
+                // Code Files
                 foreach (var file in Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.c", SearchOption.AllDirectories))
                 {
-                    files.Add(file);
+                    codeFiles.Add(file);
 
                     if (!_viewModel.Settings.CodeFiles.Any(x => x.Path == file))
                     {
@@ -120,7 +127,7 @@ namespace snes_automatizer
                 }
                 foreach (var file in Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.asm", SearchOption.AllDirectories))
                 {
-                    files.Add(file);
+                    codeFiles.Add(file);
 
                     if (!_viewModel.Settings.CodeFiles.Any(x => x.Path == file))
                     {
@@ -130,16 +137,47 @@ namespace snes_automatizer
                     index++;
                 }
 
+                // Resource Files
+                foreach (var file in Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.bmp", SearchOption.AllDirectories))
+                {
+                    imageFiles.Add(file);
+
+                    if (!_viewModel.Settings.ImageFiles.Any(x => x.Path == file))
+                    {
+                        _viewModel.Settings.ImageFiles.Add(new FileItem(file, index, CodeFileType.ResourceBmp));
+                    }
+
+                    resourceIndex++;
+                }
+                foreach (var file in Directory.GetFileSystemEntries(_viewModel.Settings.ProjectFolder, "*.png", SearchOption.AllDirectories))
+                {
+                    imageFiles.Add(file);
+
+                    if (!_viewModel.Settings.ImageFiles.Any(x => x.Path == file))
+                    {
+                        _viewModel.Settings.ImageFiles.Add(new FileItem(file, index, CodeFileType.ResourcePng));
+                    }
+
+                    resourceIndex++;
+                }
+
                 // Prune
                 //
-                _viewModel.Settings.CodeFiles.RemoveBy((x, index) => !files.Contains(x.Path));
+                _viewModel.Settings.CodeFiles.RemoveBy((x, index) => !codeFiles.Contains(x.Path));
                 _viewModel.Settings.CodeFiles.Sort(x => x.Order);
+
+                _viewModel.Settings.ImageFiles.RemoveBy((x, index) => !imageFiles.Contains(x.Path));
+                _viewModel.Settings.ImageFiles.Sort(x => x.Order);
 
                 // Assign New Order Number
                 //
                 for (int fileIndex = 0; fileIndex <  _viewModel.Settings.CodeFiles.Count; fileIndex++)
                 {
                     _viewModel.Settings.CodeFiles[fileIndex].Order = fileIndex;
+                }
+                for (int fileIndex = 0; fileIndex < _viewModel.Settings.ImageFiles.Count; fileIndex++)
+                {
+                    _viewModel.Settings.ImageFiles[fileIndex].Order = fileIndex;
                 }
             }
             catch (Exception ex)
@@ -217,7 +255,7 @@ namespace snes_automatizer
                     _viewModel.Settings = settings;
                     _viewModel.Settings.PropertyChanged += OnViewModelChanged;
 
-                    Log("Configuration file loaded:  {0}", fileName);
+                    Log("Configuration file loaded:  {0}", MessageSeverity.Info, fileName);
 
                     ReloadFiles();
                 }
@@ -228,7 +266,7 @@ namespace snes_automatizer
             }
             catch (Exception ex)
             {
-                Log("There was an error opening configuration {0}", fileName);
+                Log("There was an error opening configuration {0}", MessageSeverity.Error, fileName);
                 Log(ex.ToString());
             }
         }
@@ -238,11 +276,11 @@ namespace snes_automatizer
             try
             {
                 System.IO.File.WriteAllText(fileName, json);
-                Log("Configuration file saved:  {0}", fileName);
+                Log("Configuration file saved:  {0}", MessageSeverity.Info, fileName);
             }
             catch (Exception ex)
             {
-                Log("There was an saving configuration {0}", fileName);
+                Log("There was an saving configuration {0}", MessageSeverity.Error, fileName);
                 Log(ex.ToString());
             }
         }
@@ -278,7 +316,9 @@ namespace snes_automatizer
             _validatedSettings = _compiler.Validate(_viewModel.Settings);
             _compilation = null;
 
-            Log("Validation Complete:  {0}", _validatedSettings.ValidationPassed ? "Success" : "Failure");
+            Log("Validation Complete:  {0}", 
+                _validatedSettings.ValidationPassed ? MessageSeverity.Info : MessageSeverity.Error, 
+                _validatedSettings.ValidationPassed ? "Success" : "Failure");
         }
 
         private void RunButton_Click(object sender, RoutedEventArgs e)
@@ -290,18 +330,12 @@ namespace snes_automatizer
             }
             else
             {
-                // Get files from list box in the order they were arranged
-                var files = new List<string>();
-                foreach (var item in _viewModel.Settings.CodeFiles.OrderBy(x => x.Order))
-                {
-                    if (item.Included)
-                    {
-                        files.Add(item.Path);
-                    }
-                }
-
                 Log("Creating compilation commands...");
-                _compilation = _compiler.PrepareRun(_validatedSettings, files);
+
+                // Filter the compilation by the user's preferences
+                _compilation = _compiler.PrepareRun(_validatedSettings, 
+                                                    _viewModel.Settings.CodeFiles.Where(x => x.Included).OrderBy(x => x.Order), 
+                                                    _viewModel.Settings.ImageFiles.Where(x => x.Included).OrderBy(x => x.Order));
 
                 if (MessageBox.Show("Execute Compilation?", "SNES Compiler", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
                 {
@@ -375,6 +409,73 @@ namespace snes_automatizer
         {
             _viewModel.Settings.CodeFiles.Clear();
             ReloadFiles();
+        }
+
+        private void ShowCommandsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_validatedSettings == null ||
+               !_validatedSettings.ValidationPassed)
+            {
+                Log("Setting not validated. Please validate before running.");
+            }
+            else
+            {
+                // Filter the compilation by the user's preferences
+                _compilation = _compiler.PrepareRun(_validatedSettings,
+                                                    _viewModel.Settings.CodeFiles.Where(x => x.Included).OrderBy(x => x.Order),
+                                                    _viewModel.Settings.ImageFiles.Where(x => x.Included).OrderBy(x => x.Order));
+
+                // Show Commands that result for the compilation:  Compile (-> .asm) -> .obj, Link -> .sfc 
+                _compilation.CommandSet.CFileCommands.ForEach(command =>
+                {
+                    Log(command.Compile.GetFullCommandLine());
+                    Log(command.Optimize.GetFullCommandLine());
+                    Log(command.Constify.GetFullCommandLine());
+                    Log(command.Assemble.GetFullCommandLine());
+                });
+
+                _compilation.CommandSet.AssemblerCommands.ForEach(command =>
+                {
+                    Log(command.GetFullCommandLine());
+                });
+
+                Log(_compilation.CommandSet.LinkCommand.GetFullCommandLine());
+
+                _compilation.CommandSet.ResourceCommands.ForEach(command =>
+                {
+                    Log(command.GetFullCommandLine());
+                });
+            }
+        }
+
+        private void CreateLinkerFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_validatedSettings == null ||
+                   !_validatedSettings.ValidationPassed)
+                {
+                    Log("Setting not validated. Please validate before running.");
+                }
+                else
+                {
+                    var objFiles = Directory.GetFiles(_validatedSettings.Settings.ProjectFolder, "*.obj");
+                    var path = Path.Combine(_validatedSettings.Settings.ProjectFolder, "linkfile");
+
+                    if (_compiler.CreateLinkerFile(path, _validatedSettings.MemoryMapFolder, objFiles))
+                    {
+                        Log("Link file created successfully!");
+                    }
+                    else
+                    {
+                        Log("Link file creation failed", MessageSeverity.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("Create Linker File Error:  " + ex.ToString(), MessageSeverity.Error);
+            }
         }
     }
 }

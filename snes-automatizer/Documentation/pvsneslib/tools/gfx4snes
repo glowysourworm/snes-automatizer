@@ -1,0 +1,33 @@
+gfx4snes.exe
+------------
+
+Usage: gfx4snes [options] -i file...
+  where file is a 256 color PNG or BMP file
+Tiles options:
+  -b, --til-blank            add blank tile management (for multiple bgs)
+  -s, --til-size <int>       size of image blocks in pixels {[8],16,32,64}
+  -k, --til-pack             output in packed pixel format
+  -z, --til-lzpack           add blank tile management (for multiple bgs)
+  -W, --tile-width <int>     width of image block in pixels
+  -H, --tile-height <int>    height of image block in pixels
+Maps options:
+  -f, --map-offset <int>     generate the whole picture with an offset for tile number {0..2047}
+  -m, --map-output           include map for output
+  -g, --map-highpriority     include high priority bit in map
+  -y, --map-32x32            generate map in pages of 32x32 (good for scrolling)
+  -R, --map-noreduction      no tile reduction (not advised)
+  -M, --map-mode <int>       convert the whole picture for mode 1,5,6 or 7 format {[1],5,6,7}
+Palettes options:
+  -a, --pal-rearrange        rearrange palette and preserve palette numbers in tilemap
+  -d, --pal-rounded          palette rounding (to a maximum value of 63)
+  -e, --pal-entry <int>      palette entry to add to map tiles {0..7}
+  -o, --pal-col-output <int>
+                             number of colors to output to filename.pal {0..256}
+  -p, --pal-output           include palette for output
+  -u, --pal-col-use <int>    number of colors to use {4,16,128,[256]}
+Files options:
+  -i, --file-input <string>  png or bmp image to convert
+  -t, --file-type <png,bmp>  convert a png or bmp file
+Miscellaneous options:
+  -q, --quiet                quiet mode
+  -v, --version              display version information

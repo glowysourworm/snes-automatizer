@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
-namespace snes_automatizer
+namespace snes_automatizer.Model
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

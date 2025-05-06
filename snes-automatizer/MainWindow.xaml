@@ -4,21 +4,22 @@
         xmlns:snes_automatizer="clr-namespace:snes_automatizer" 
         xmlns:converter="clr-namespace:snes_automatizer.Converter" 
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:model="clr-namespace:snes_automatizer.Model"
         Background="#EEEEFF" Foreground="#555555" 
         Title="SNES Automatizer">
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="10" />
+            <Setter Property="Margin" Value="10 0 5 5" />
             <Setter Property="FontSize" Value="14" />
         </Style>
         <Style TargetType="TextBox">
-            <Setter Property="Margin" Value="5" />
+            <Setter Property="Margin" Value="5 0 5 5" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style TargetType="Button">
-            <Setter Property="Margin" Value="5 5 0 5" />
+            <Setter Property="Margin" Value="5 0 5 5" />
             <Setter Property="Content" Value="..." />
         </Style>
         <Style TargetType="snes_automatizer:RadioButtonEnumControl">
@@ -26,6 +27,7 @@
             <Setter Property="Background" Value="#AFFFFFFF" />
         </Style>
         <converter:LeftEllipsisConverter x:Key="LeftEllipsisConverter" />
+        <converter:OutputMessageBackgroundConverter x:Key="OutputMessageBackgroundConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -43,38 +45,41 @@
         <!-- File Menu -->
         <Menu Grid.ColumnSpan="2">
             <MenuItem Header="_File">
-                    <MenuItem x:Name="NewButton" Header="_New"  Click="NewButton_Click" />
-                    <MenuItem x:Name="OpenButton" Header="_Open" Click="OpenButton_Click" />
-                    <MenuItem x:Name="SaveButton" Header="_Save" Click="SaveButton_Click" />
+                <MenuItem x:Name="NewButton" Header="_New"  Click="NewButton_Click" />
+                <MenuItem x:Name="OpenButton" Header="_Open" Click="OpenButton_Click" />
+                <MenuItem x:Name="SaveButton" Header="_Save" Click="SaveButton_Click" />
             </MenuItem>
             <MenuItem Header="_Compiler">
-                    <MenuItem x:Name="ValidateButton" Header="_Validate" Click="ValidateButton_Click" />
-                    <MenuItem x:Name="RunButton" Header="_Run" Click="RunButton_Click" />                    
+                <MenuItem x:Name="ValidateButton" Header="_Validate" Click="ValidateButton_Click" />
+                <MenuItem x:Name="RunButton" Header="_Run" Click="RunButton_Click" />
+                <Separator />
+                <MenuItem x:Name="ShowCommandsButton" Header="_Output Commands" Click="ShowCommandsButton_Click" />
+                <MenuItem x:Name="CreateLinkerFileButton" Header="Create _Linker File (from *.obj)" Click="CreateLinkerFileButton_Click" />
             </MenuItem>
         </Menu>
         
-        <TextBlock Text="Compiler Settings" FontSize="16" Margin="10 10 10 0" Grid.Row="1" />
+        <TextBlock Text="Compiler Settings" FontSize="16" Margin="10 5 5 0" Grid.Row="1" />
 
-        <Grid Grid.Column="1" Grid.Row="1"  Margin="10 10 10 0">
+        <Grid Grid.Column="1" Grid.Row="1"  Margin="10 5 15 5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Project Files" FontSize="16" />
-            <Button Content="Refresh" FontSize="12" VerticalAlignment="Center" Padding="5" Margin="0 0 30 0" x:Name="ProjectFilesRefreshButton" Click="ProjectFilesRefreshButton_Click" Grid.Column="1" />
+            <TextBlock Text="Project Files (Top: .c, .asm)(Bottom: .bmp, .png)" FontSize="16" Margin="0" />
+            <Button Content="Refresh" FontSize="12" VerticalAlignment="Center" Padding="5" Margin="0" x:Name="ProjectFilesRefreshButton" Click="ProjectFilesRefreshButton_Click" Grid.Column="1" />
         </Grid>
 
 
         <!-- Parameters -->
-        <Grid Grid.Row="2" Margin="10" >
+        <Grid Grid.Row="2" Margin="0 0 5 0" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="160" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="40" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="42" />
-                <RowDefinition Height="42" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
                 <RowDefinition Height="60" />
                 <RowDefinition Height="60" />
             </Grid.RowDefinitions>
@@ -86,8 +91,8 @@
 
             <TextBox Text="{Binding Settings.ProjectFolder, UpdateSourceTrigger=PropertyChanged, Delay=500}" Grid.Column="1" />
             <TextBox Text="{Binding Settings.PVSNESLIBFolder, UpdateSourceTrigger=PropertyChanged, Delay=500}" Grid.Column="1" Grid.Row="1" />
-            <snes_automatizer:RadioButtonEnumControl EnumValue="{Binding Settings.MemoryMap, Mode=TwoWay}" Grid.Column="1" Grid.Row="2" EnumGroupName="MemoryMap"  EnumType="{x:Type snes_automatizer:MemoryMapSettings}" />
-            <snes_automatizer:RadioButtonEnumControl EnumValue="{Binding Settings.Speed, Mode=TwoWay}" Grid.Column="1" Grid.Row="3" EnumGroupName="Speed"  EnumType="{x:Type snes_automatizer:SpeedSettings}" />
+            <snes_automatizer:RadioButtonEnumControl EnumValue="{Binding Settings.MemoryMap, Mode=TwoWay}" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" EnumGroupName="MemoryMap"  EnumType="{x:Type model:MemoryMapSettings}" />
+            <snes_automatizer:RadioButtonEnumControl EnumValue="{Binding Settings.Speed, Mode=TwoWay}" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" EnumGroupName="Speed"  EnumType="{x:Type model:SpeedSettings}" />
 
             <Button x:Name="ProjectFolderButton" Click="ProjectFolderButton_Click" Grid.Column="2" />
             <Button x:Name="PVSNESLIBFolderButton" Click="PVSNESLIBFolderButton_Click" Grid.Column="2" Grid.Row="1" />
@@ -95,11 +100,17 @@
 
 
         <!-- Project Files (C / ASM) -->
-        <Grid Grid.Column="1" Grid.RowSpan="3" Grid.Row="2" Margin="10">
+        <Grid Grid.Column="1" Grid.RowSpan="3" Grid.Row="2" Margin="10 0 10 10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <!-- Code Files -->
             <ListBox x:Name="ProjectFilesLB" ItemsSource="{Binding Settings.CodeFiles}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -127,6 +138,27 @@
                 </Button>
                 <Button x:Name="OrderDownButton" Height="24" Width="24" Content="V" Click="OrderDownButton_Click" />
             </StackPanel>
+
+            <!-- Resource Files -->
+            <ListBox x:Name="ResourceFilesLB" ItemsSource="{Binding Settings.ImageFiles}" Grid.Row="1" Margin="0 10 0 0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox IsChecked="{Binding Included}" Margin="1" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Path, Converter={StaticResource LeftEllipsisConverter}}" 
+                                       ToolTip="{Binding Path}"
+                                       Margin="7 1 1 1" 
+                                       HorizontalAlignment="Right" 
+                                       VerticalAlignment="Center" 
+                                       Grid.Column="1" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
 
         <Grid Margin="10 10 10 0" Grid.Row="3" >
@@ -143,16 +175,26 @@
         <ListView x:Name="OutputLB" ItemsSource="{Binding OutputMessages}" Foreground="Black" Grid.Row="4" Margin="10">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
-                        <Grid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="_Copy" Click="OutputMessage_Click" Tag="{Binding}" />
-                            </ContextMenu>
-                        </Grid.ContextMenu>
-                        <TextBlock Text="{Binding}" />
-                    </Grid>
+                    <Border Background="{Binding Severity, Converter={StaticResource OutputMessageBackgroundConverter}}">
+                        <Grid>
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="_Copy" Click="OutputMessage_Click" Tag="{Binding Message}" />
+                                </ContextMenu>
+                            </Grid.ContextMenu>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd hh:mm:ss}'}" Margin="0 0 10 0" />
+                            <TextBlock Text="{Binding Message}" Grid.Column="1" />
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        
     </Grid>
 </Window>

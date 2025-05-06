@@ -1,0 +1,15 @@
+Usage : tmx2snes [options] tmxfilename mapfilename
+  where tmxfilename is a Tiled tmx file (in json format)
+        mapfilename is the map file of tileset for tileset optimization
+
+  tmx2snes will do:
+        .m16 file for map
+        .b16 file for tileset attribute (blocker, etc...)
+        .o16 file for objects
+        .t16 file for tileset properties (palette,priority)
+tmx2snes: error 'The [--help] parameter is not recognized'
+
+Misc options:
+-h                Display this information
+-q                Quiet mode
+-v                Display version information

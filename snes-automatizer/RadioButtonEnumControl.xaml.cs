@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
+using snes_automatizer.Model;
+
 namespace snes_automatizer
 {
     public partial class RadioButtonEnumControl : UserControl
